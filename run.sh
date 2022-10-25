@@ -1,12 +1,17 @@
 #!/bin/bash
 clear
 
-
 ### 清理 ###
+echo "清理 ./openwrt/"
 rm -rf openwrt
 
+openwrt_version_code="v21.02.3"
+# lede_tag_code="20221001"
+
+extra_package_path="./package/extra/"
+
 ### 获取openwrt ###
-git clone --depth 1 -b v21.02.3 https://github.com/openwrt/openwrt openwrt
+git clone --depth 1 -b $openwrt_version_code https://github.com/openwrt/openwrt openwrt
 
 #切换到openwrt目录
 cd openwrt
@@ -22,7 +27,8 @@ sed -i "s,'eth1' 'eth0','eth0' 'eth1',g" target/linux/rockchip/armv8/base-files/
 
 # 更新 Feeds
 ./scripts/feeds update -a
-./scripts/feeds install -a
+
+# 安装Feeds
 ./scripts/feeds install -a
 
 # UPX 可执行软件压缩
@@ -32,63 +38,55 @@ svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/tools/upx tools
 svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/tools/ucl tools/ucl
 
 ### 获取额外的 LuCI 应用、主题和依赖 ###
-#替换原frp
-rm -rf ./feeds/luci/applications/luci-app-frps
-rm -rf ./feeds/luci/applications/luci-app-frpc
-rm -rf ./feeds/packages/net/frp
-rm -f ./package/feeds/packages/frp
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-frps package/extra/luci-app-frps
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-frpc package/extra/luci-app-frpc
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/frp package/extra/frp
 
-#AliyunDrive-WebDav
-svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/aliyundrive-webdav package/extra/aliyundrive-webdav
-svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt/luci-app-aliyundrive-webdav package/extra/luci-app-aliyundrive-webdav
+# 更换smartdns
+rm -rf feeds/packages/net/smartdns
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/smartdns/ feeds/packages/net/smartdns
 
-# SmartDNS(原SmartDNS版本较低)
-rm -rf ./feeds/packages/net/smartdns
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/smartdns feeds/packages/net/smartdns
-rm -rf ./feeds/luci/applications/luci-app-smartdns
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-smartdns feeds/luci/applications/luci-app-smartdns
+# 替换luci-app-smartdns
+rm -rf feeds/luci/applications/luci-app-smartdns
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-smartdns/ feeds/luci/applications/luci-app-smartdns
 
-# socat
-svn export https://github.com/Lienol/openwrt-package/trunk/luci-app-socat package/extra/luci-app-socat
+# Argon主题
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-theme-argon/ ${extra_package_path}/luci-theme-argon
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-argon-config/ ${extra_package_path}/luci-app-argon-config
 
 # ChinaDNS
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/chinadns-ng/ package/extra/chinadns-ng
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/chinadns-ng/ ${extra_package_path}/chinadns-ng
 
 # OLED 驱动程序
-git clone -b master --depth 1 https://github.com/NateLol/luci-app-oled.git package/extra/luci-app-oled
+git clone -b master --depth 1 https://github.com/NateLol/luci-app-oled.git ${extra_package_path}/luci-app-oled
 
 # Passwall
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-passwall package/extra/luci-app-passwall
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-passwall2 package/extra/luci-app-passwall2
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/ipt2socks package/extra/ipt2socks
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/microsocks package/extra/microsocks
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/dns2socks package/extra/dns2socks
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/naiveproxy package/extra/naiveproxy
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/pdnsd-alt package/extra/pdnsd-alt
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/shadowsocks-rust package/extra/shadowsocks-rust
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/shadowsocksr-libev package/extra/shadowsocksr-libev
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/simple-obfs package/extra/simple-obfs
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/tcping package/extra/tcping
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/trojan-go package/extra/trojan-go
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/brook package/extra/brook
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/trojan-plus package/extra/trojan-plus
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/ssocks package/extra/ssocks
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/xray-core package/extra/xray-core
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-plugin package/extra/v2ray-plugin
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/xray-plugin package/extra/xray-plugin
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/hysteria package/extra/hysteria
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-core package/extra/v2ray-core
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-geodata package/extra/v2ray-geodata
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-passwall ${extra_package_path}/luci-app-passwall
+# 修改luci-app-passwall中的Makefile以支持最新的iptables
+sed -i 's,iptables-legacy,iptables-nft,g' ${extra_package_path}/luci-app-passwall/Makefile
+
+# Passwall的依赖包
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/ipt2socks ${extra_package_path}/ipt2socks
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/microsocks ${extra_package_path}/microsocks
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/dns2socks ${extra_package_path}/dns2socks
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/dns2tcp ${extra_package_path}/dns2tcp
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/naiveproxy ${extra_package_path}/naiveproxy
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/pdnsd-alt ${extra_package_path}/pdnsd-alt
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/shadowsocks-rust ${extra_package_path}/shadowsocks-rust
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/shadowsocksr-libev ${extra_package_path}/shadowsocksr-libev
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/simple-obfs ${extra_package_path}/simple-obfs
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/tcping ${extra_package_path}/tcping
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/trojan-go ${extra_package_path}/trojan-go
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/brook ${extra_package_path}/brook
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/trojan-plus ${extra_package_path}/trojan-plus
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/ssocks ${extra_package_path}/ssocks
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/xray-core ${extra_package_path}/xray-core
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-plugin ${extra_package_path}/v2ray-plugin
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/xray-plugin ${extra_package_path}/xray-plugin
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/hysteria ${extra_package_path}/hysteria
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-core ${extra_package_path}/v2ray-core
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/v2ray-geodata ${extra_package_path}/v2ray-geodata
 
 # KMS 激活助手
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-vlmcsd package/extra/luci-app-vlmcsd
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/vlmcsd package/extra/vlmcsd
-
-#Luci主题
-svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-theme-neobird package/extra/luci-theme-neobird
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/luci-app-vlmcsd ${extra_package_path}/luci-app-vlmcsd
+svn export https://github.com/mrzhaohanhua/openwrt-package/trunk/vlmcsd ${extra_package_path}/vlmcsd
 
 ### 后续修改 ###
 
