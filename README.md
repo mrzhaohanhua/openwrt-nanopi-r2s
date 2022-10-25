@@ -1,1 +1,1 @@
-# openwrt-nanopi-r2s
+# openwrt-r2s
