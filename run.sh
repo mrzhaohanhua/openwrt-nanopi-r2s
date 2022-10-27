@@ -5,7 +5,7 @@ clear
 echo "清理 ./openwrt/"
 rm -rf openwrt
 
-openwrt_version_code="v21.02.3"
+openwrt_version_code="v21.02.1"
 # lede_tag_code="20221001"
 
 extra_package_path="./package/extra/"
